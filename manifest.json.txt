@@ -1,7 +1,7 @@
 {
   "name": "Balance Calórico",
   "short_name": "Balance",
-  "start_url": "./balance-calorico.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#14171C",
   "theme_color": "#14171C",

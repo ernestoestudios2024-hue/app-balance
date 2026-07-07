@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Balance calórico</title>
-<link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#14171C">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
@@ -21,9 +21,11 @@
   --border: #2C313B;
   --deficit: #4FD1A5;
   --deficit-dim: #234A3D;
-  --surplus: #FF6B5F;
-  --surplus-dim: #4A2723;
+  --surplus: #FF9D4D;
+  --surplus-dim: #4A3420;
   --neutral: #F2C14E;
+  --chart-weight: #7FB3FF;
+  --chart-fat: #C792EA;
 }
 
 body {
@@ -37,7 +39,7 @@ body {
 .app {
   max-width: 460px;
   margin: 0 auto;
-  padding: 20px 16px 48px;
+  padding: 20px 16px 100px;
 }
 
 .eyebrow {
@@ -111,8 +113,10 @@ body {
   font-size: 34px;
   font-weight: 600;
   line-height: 1.1;
-  margin: 0 0 14px;
+  margin: 0;
 }
+
+.summary-value.has-beam { margin-bottom: 14px; }
 
 .beam {
   position: relative;
@@ -184,24 +188,17 @@ body {
   font-weight: 600;
 }
 
-.day-inputs {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.field {
-  flex: 1;
-  min-width: 0;
+.field-full {
   display: flex;
   align-items: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0 10px;
+  margin-top: 10px;
 }
 
-.field label {
+.field-full label {
   font-size: 11px;
   color: var(--text-faint);
   white-space: nowrap;
@@ -209,7 +206,7 @@ body {
   flex-shrink: 0;
 }
 
-.field input {
+.field-full input {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -223,10 +220,85 @@ body {
   padding: 9px 0;
   -moz-appearance: textfield;
 }
-.field input::-webkit-outer-spin-button,
-.field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.field input::placeholder { color: var(--text-faint); }
-.field:focus-within { border-color: var(--text-faint); }
+.field-full input::-webkit-outer-spin-button,
+.field-full input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field-full input::placeholder { color: var(--text-faint); }
+.field-full:focus-within { border-color: var(--text-faint); }
+
+.burn-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 12px 0 6px;
+}
+
+.burn-header span:first-child {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.burn-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btn-quick-full {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-quick-full:active { transform: scale(0.98); }
+
+.burn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.burn-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.burn-field label {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 2px;
+}
+
+.burn-field input {
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.burn-field input::-webkit-outer-spin-button,
+.burn-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.burn-field input::placeholder { color: var(--text-faint); }
+.burn-field:focus-within { border-color: var(--text-faint); }
 
 .legend {
   display: flex;
@@ -245,25 +317,296 @@ body {
   font-size: 13px;
   padding: 40px 0;
 }
+
+/* Calendario mensual */
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-faint);
+  margin: 0 0 6px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.cal-cell.empty { background: transparent; border: none; }
+.cal-cell.today { border-color: var(--neutral); }
+
+.cal-dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.cal-dot.deficit { background: var(--deficit); }
+.cal-dot.surplus { background: var(--surplus); }
+.cal-dot.neutral { background: var(--neutral); }
+
+/* Calendario anual */
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.mini-month {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.mini-month-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 6px;
+  color: var(--text-muted);
+}
+
+.mini-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+}
+.mini-cal-cell.today { background: rgba(242, 193, 78, 0.18); }
+
+.mini-dot { width: 4px; height: 4px; border-radius: 50%; background: transparent; }
+.mini-dot.deficit { background: var(--deficit); }
+.mini-dot.surplus { background: var(--surplus); }
+.mini-dot.neutral { background: var(--neutral); }
+
+/* Inicio */
+.maint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.maint-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.maint-row input::-webkit-outer-spin-button,
+.maint-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.maint-row input:focus { border-color: var(--text-faint); }
+.maint-unit { font-size: 12px; color: var(--text-faint); white-space: nowrap; }
+
+.stat-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stat-row.two { grid-template-columns: 1fr 1fr; }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+.stat-label { font-size: 11px; color: var(--text-faint); margin: 0; }
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.section-header > span:first-child {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.quick-log { display: flex; gap: 6px; align-items: center; }
+.quick-log input {
+  width: 68px;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.quick-log input::-webkit-outer-spin-button,
+.quick-log input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.btn-quick {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-quick:active { transform: scale(0.96); }
+
+.chart-svg { width: 100%; height: 80px; display: block; }
+.chart-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+.chart-last { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.chart-empty {
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Barra de pestañas */
+.tabbar-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tabbar {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 12px 0 10px;
+  cursor: pointer;
+}
+
+.tab-btn .tab-indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.tab-btn.active { color: var(--text); }
+.tab-btn.active .tab-indicator { background: var(--neutral); }
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <p class="eyebrow">Registro diario</p>
   <h1 class="title">Balance calórico</h1>
-  <div class="loading" id="loading">Cargando datos…</div>
+  <div id="content">
+    <div class="loading">Cargando datos…</div>
+  </div>
+</div>
+
+<div class="tabbar-wrap">
+  <div class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-tab="inicio"><span class="tab-indicator"></span>Inicio</button>
+    <button class="tab-btn" data-tab="semana"><span class="tab-indicator"></span>Semana</button>
+    <button class="tab-btn" data-tab="mes"><span class="tab-indicator"></span>Mes</button>
+    <button class="tab-btn" data-tab="año"><span class="tab-indicator"></span>Año</button>
+  </div>
 </div>
 
 <script>
 const STORAGE_PREFIX = 'day:';
+const WEIGHT_PREFIX = 'weight:';
+const FAT_PREFIX = 'fat:';
+const SETTINGS_MAINT_KEY = 'settings:maintenance';
+
 const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const WEEKDAY_LETTERS = ['L','M','M','J','V','S','D'];
 const MONTH_NAMES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MONTH_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTH_ABBR = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_BEAM_MAX = 800;
 const WEEK_BEAM_MAX = 3500;
+const BURN_FIELDS = ['mantenimiento', 'neat', 'caminata', 'gym', 'carrera'];
 
+let currentTab = 'inicio';
 let weekStart = getMonday(new Date());
+let monthCursor = firstOfMonth(new Date());
+let yearCursor = new Date().getFullYear();
 let weekData = {};
 let saveTimers = {};
+let maintenanceValue = '';
+
+const appEl = document.getElementById('app');
+const contentEl = document.getElementById('content');
+const tabbarEl = document.getElementById('tabbar');
+
+/* ---------- utilidades de fecha ---------- */
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -302,18 +645,49 @@ function formatRange(monday) {
   return `${monday.getDate()} ${MONTH_NAMES[monday.getMonth()]} – ${sunday.getDate()} ${MONTH_NAMES[sunday.getMonth()]} ${sunday.getFullYear()}`;
 }
 
+function firstOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+function daysInMonth(year, monthIndex) { return new Date(year, monthIndex + 1, 0).getDate(); }
+
+function mondayIndex(jsDay) { return jsDay === 0 ? 6 : jsDay - 1; }
+
+/* ---------- modelo de datos ---------- */
+
+function emptyEntry() {
+  return { consumed: '', mantenimiento: '', neat: '', caminata: '', gym: '', carrera: '' };
+}
+
+function normalizeEntry(entry) {
+  if (!entry) return emptyEntry();
+  if (entry.burned !== undefined && entry.neat === undefined) {
+    return { consumed: entry.consumed ?? '', mantenimiento: '', neat: entry.burned ?? '', caminata: '', gym: '', carrera: '' };
+  }
+  return {
+    consumed: entry.consumed ?? '',
+    mantenimiento: entry.mantenimiento ?? '',
+    neat: entry.neat ?? '',
+    caminata: entry.caminata ?? '',
+    gym: entry.gym ?? '',
+    carrera: entry.carrera ?? ''
+  };
+}
+
 function num(v) {
   const n = parseFloat(v);
   return isNaN(n) ? 0 : n;
 }
 
+function burnedTotal(entry) {
+  return BURN_FIELDS.reduce((sum, f) => sum + num(entry[f]), 0);
+}
+
 function hasData(entry) {
-  return entry && (entry.consumed !== '' || entry.burned !== '');
+  return !!entry && (entry.consumed !== '' || BURN_FIELDS.some((f) => entry[f] !== ''));
 }
 
 function netOf(entry) {
   if (!hasData(entry)) return null;
-  return num(entry.consumed) - num(entry.burned);
+  return num(entry.consumed) - burnedTotal(entry);
 }
 
 function fmtSigned(n) {
@@ -329,6 +703,13 @@ function colorFor(net) {
   return 'var(--neutral)';
 }
 
+function dotClassFor(net) {
+  if (net === null) return 'none';
+  if (net < 0) return 'deficit';
+  if (net > 0) return 'surplus';
+  return 'neutral';
+}
+
 function beamHTML(net, maxScale, small, id) {
   const cls = small ? 'beam small' : 'beam';
   const idAttr = id ? ` id="${id}"` : '';
@@ -341,19 +722,81 @@ function beamHTML(net, maxScale, small, id) {
   return `<div class="${cls}"${idAttr}><div class="beam-center"></div><div class="beam-fill" style="${side} background:${color};"></div></div>`;
 }
 
-async function loadWeek() {
-  const days = getWeekDates(weekStart);
-  const results = await Promise.all(days.map(async (d) => {
-    const iso = toISO(d);
-    try {
-      const res = await window.storage.get(STORAGE_PREFIX + iso, false);
-      return [iso, res ? JSON.parse(res.value) : { consumed: '', burned: '' }];
-    } catch (e) {
-      return [iso, { consumed: '', burned: '' }];
-    }
-  }));
-  weekData = Object.fromEntries(results);
-  render();
+/* ---------- gráfico de línea simple ---------- */
+
+function lineChartSVG(entries, color, unit) {
+  if (!entries.length) return `<div class="chart-empty">Sin datos todavía</div>`;
+  const values = entries.map((e) => e[1]);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const w = 300, h = 80, pad2 = 8;
+  const stepX = entries.length > 1 ? (w - pad2 * 2) / (entries.length - 1) : 0;
+  const points = entries.map((e, i) => {
+    const x = pad2 + i * stepX;
+    const y = pad2 + (h - pad2 * 2) * (1 - (e[1] - min) / range);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const last = values[values.length - 1];
+  return `
+    <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none">
+      <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="chart-meta">
+      <span>${entries[0][0].slice(5)}</span>
+      <span class="chart-last" style="color:${color}">${last}${unit}</span>
+    </div>`;
+}
+
+/* ---------- almacenamiento ---------- */
+
+async function fetchByPrefix(prefix) {
+  const map = {};
+  try {
+    const res = await window.storage.list(prefix, false);
+    const keys = (res && res.keys) || [];
+    await Promise.all(keys.map(async (key) => {
+      try {
+        const r = await window.storage.get(key, false);
+        if (r) {
+          const iso = key.slice(prefix.length);
+          map[iso] = normalizeEntry(JSON.parse(r.value));
+        }
+      } catch (e) { /* clave inexistente o corrupta, se ignora */ }
+    }));
+  } catch (e) { /* sin datos para este prefijo */ }
+  return map;
+}
+
+async function fetchRawSeries(prefix) {
+  const map = {};
+  try {
+    const res = await window.storage.list(prefix, false);
+    const keys = (res && res.keys) || [];
+    await Promise.all(keys.map(async (key) => {
+      try {
+        const r = await window.storage.get(key, false);
+        if (r) map[key.slice(prefix.length)] = parseFloat(r.value);
+      } catch (e) {}
+    }));
+  } catch (e) {}
+  return map;
+}
+
+async function loadSettings() {
+  try {
+    const r = await window.storage.get(SETTINGS_MAINT_KEY, false);
+    maintenanceValue = r ? r.value : '';
+  } catch (e) {
+    maintenanceValue = '';
+  }
+}
+
+async function saveMaintenance(value) {
+  maintenanceValue = value;
+  try {
+    await window.storage.set(SETTINGS_MAINT_KEY, value, false);
+  } catch (e) { console.error('No se pudo guardar el mantenimiento', e); }
 }
 
 function scheduleSave(iso) {
@@ -367,25 +810,255 @@ function scheduleSave(iso) {
   }, 400);
 }
 
-function updateVisuals() {
+function onInput(iso, field, value) {
+  weekData[iso] = weekData[iso] || emptyEntry();
+  weekData[iso][field] = value;
+  updateWeekVisuals();
+  scheduleSave(iso);
+}
+
+/* ---------- pestaña inicio ---------- */
+
+function computeStreak(dataMap) {
+  let streak = 0;
+  const cursor = new Date();
+  if (!hasData(dataMap[toISO(cursor)])) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (hasData(dataMap[toISO(cursor)])) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function countDays(dataMap) {
+  let sup = 0, def = 0;
+  Object.values(dataMap).forEach((e) => {
+    const net = netOf(e);
+    if (net === null) return;
+    if (net > 0) sup++;
+    else if (net < 0) def++;
+  });
+  return { sup, def };
+}
+
+async function renderHomeTab() {
+  const [dataMap, weightMap, fatMap] = await Promise.all([
+    fetchByPrefix(STORAGE_PREFIX),
+    fetchRawSeries(WEIGHT_PREFIX),
+    fetchRawSeries(FAT_PREFIX)
+  ]);
+  renderHomeHTML(dataMap, weightMap, fatMap);
+}
+
+function renderHomeHTML(dataMap, weightMap, fatMap) {
+  const streak = computeStreak(dataMap);
+  const { sup, def } = countDays(dataMap);
+  const todayIso = toISO(new Date());
+
+  const weightEntries = Object.entries(weightMap).filter(([, v]) => !isNaN(v)).sort((a, b) => a[0].localeCompare(b[0]));
+  const fatEntries = Object.entries(fatMap).filter(([, v]) => !isNaN(v)).sort((a, b) => a[0].localeCompare(b[0]));
+  const todayWeight = weightMap[todayIso] !== undefined && !isNaN(weightMap[todayIso]) ? weightMap[todayIso] : '';
+  const todayFat = fatMap[todayIso] !== undefined && !isNaN(fatMap[todayIso]) ? fatMap[todayIso] : '';
+
+  contentEl.innerHTML = `
+    <div class="summary">
+      <p class="summary-label">Calorías de mantenimiento</p>
+      <div class="maint-row">
+        <input type="number" inputmode="numeric" min="0" id="maint-input" placeholder="Ej: 2200" value="${maintenanceValue}">
+        <span class="maint-unit">kcal/día</span>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <p class="stat-value" style="color:var(--neutral)">${streak}</p>
+        <p class="stat-label">Racha de días registrados</p>
+      </div>
+    </div>
+
+    <div class="stat-row two">
+      <div class="stat-card">
+        <p class="stat-value" style="color:var(--surplus)">${sup}</p>
+        <p class="stat-label">Días superávit</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value" style="color:var(--deficit)">${def}</p>
+        <p class="stat-label">Días déficit</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span>Gráfico de peso</span>
+        <div class="quick-log">
+          <input type="number" step="0.1" inputmode="decimal" id="weight-input" placeholder="kg" value="${todayWeight}">
+          <button class="btn-quick" data-action="save-weight">Guardar</button>
+        </div>
+      </div>
+      ${lineChartSVG(weightEntries, 'var(--chart-weight)', ' kg')}
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span>Gráfico de grasa corporal</span>
+        <div class="quick-log">
+          <input type="number" step="0.1" inputmode="decimal" id="fat-input" placeholder="%" value="${todayFat}">
+          <button class="btn-quick" data-action="save-fat">Guardar</button>
+        </div>
+      </div>
+      ${lineChartSVG(fatEntries, 'var(--chart-fat)', ' %')}
+    </div>
+  `;
+}
+
+async function saveWeightToday() {
+  const input = document.getElementById('weight-input');
+  if (!input || input.value === '') return;
+  const iso = toISO(new Date());
+  try {
+    await window.storage.set(WEIGHT_PREFIX + iso, input.value, false);
+  } catch (e) { console.error('No se pudo guardar el peso', e); }
+  renderHomeTab();
+}
+
+async function saveFatToday() {
+  const input = document.getElementById('fat-input');
+  if (!input || input.value === '') return;
+  const iso = toISO(new Date());
+  try {
+    await window.storage.set(FAT_PREFIX + iso, input.value, false);
+  } catch (e) { console.error('No se pudo guardar la grasa corporal', e); }
+  renderHomeTab();
+}
+
+/* ---------- pestaña semana ---------- */
+
+async function renderWeekTab() {
+  const days = getWeekDates(weekStart);
+  const results = await Promise.all(days.map(async (d) => {
+    const iso = toISO(d);
+    try {
+      const res = await window.storage.get(STORAGE_PREFIX + iso, false);
+      return [iso, normalizeEntry(res ? JSON.parse(res.value) : null)];
+    } catch (e) {
+      return [iso, emptyEntry()];
+    }
+  }));
+  weekData = Object.fromEntries(results);
+  renderWeekHTML();
+}
+
+function renderWeekHTML() {
+  const today = new Date();
+  const days = getWeekDates(weekStart);
+
+  const dayCards = days.map((d, i) => {
+    const iso = toISO(d);
+    const entry = weekData[iso] || emptyEntry();
+    const net = netOf(entry);
+    const isToday = isSameDay(d, today);
+    const maintBtnLabel = maintenanceValue !== '' ? `+ Usar mantenimiento (${maintenanceValue} kcal)` : '+ Usar mantenimiento (definilo en Inicio)';
+    return `
+      <div class="daycard${isToday ? ' today' : ''}">
+        <div class="day-top">
+          <div><span class="day-name">${DAY_NAMES[i]}</span><span class="day-date">${d.getDate()} ${MONTH_NAMES[d.getMonth()]}</span></div>
+          <div class="day-net" id="net-${iso}" style="color:${colorFor(net)}">${net === null ? '—' : fmtSigned(net)}</div>
+        </div>
+        ${beamHTML(net, DAY_BEAM_MAX, true, `beam-${iso}`)}
+
+        <div class="field-full">
+          <label>Comidas</label>
+          <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.consumed}"
+            data-iso="${iso}" data-field="consumed">
+        </div>
+
+        <div class="burn-header">
+          <span>Gastadas</span>
+          <span class="burn-total" id="burn-total-${iso}">${Math.round(burnedTotal(entry)).toLocaleString('es-AR')} kcal</span>
+        </div>
+
+        <div class="field-full">
+          <label>Mant.</label>
+          <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.mantenimiento}"
+            data-iso="${iso}" data-field="mantenimiento">
+        </div>
+        <button class="btn-quick-full" data-action="add-maintenance" data-iso="${iso}">${maintBtnLabel}</button>
+
+        <div class="burn-grid">
+          <div class="burn-field">
+            <label>NEAT</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.neat}"
+              data-iso="${iso}" data-field="neat">
+          </div>
+          <div class="burn-field">
+            <label>Caminata</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.caminata}"
+              data-iso="${iso}" data-field="caminata">
+          </div>
+          <div class="burn-field">
+            <label>Gym</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.gym}"
+              data-iso="${iso}" data-field="gym">
+          </div>
+          <div class="burn-field">
+            <label>Carrera</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.carrera}"
+              data-iso="${iso}" data-field="carrera">
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="weeknav">
+      <button class="navbtn" data-action="week-prev" aria-label="Semana anterior">‹</button>
+      <button class="navbtn today" data-action="week-today">Hoy</button>
+      <button class="navbtn" data-action="week-next" aria-label="Semana siguiente">›</button>
+    </div>
+    <p class="weekrange">${formatRange(weekStart)}</p>
+
+    <div class="summary">
+      <p class="summary-label" id="summary-label">—</p>
+      <p class="summary-value has-beam" id="summary-value">—</p>
+      ${beamHTML(null, WEEK_BEAM_MAX, false, 'summary-beam')}
+    </div>
+
+    <div class="daylist">${dayCards}</div>
+
+    <div class="legend">
+      <span><span class="dot" style="background:var(--deficit)"></span>Déficit</span>
+      <span><span class="dot" style="background:var(--surplus)"></span>Superávit</span>
+    </div>
+  `;
+
+  updateWeekVisuals();
+}
+
+function updateWeekVisuals() {
   const days = getWeekDates(weekStart);
   let total = 0;
   let anyData = false;
 
   days.forEach((d) => {
     const iso = toISO(d);
-    const entry = weekData[iso];
+    const entry = weekData[iso] || emptyEntry();
     const net = netOf(entry);
     if (net !== null) { total += net; anyData = true; }
 
     const netEl = document.getElementById(`net-${iso}`);
     const beamEl = document.getElementById(`beam-${iso}`);
+    const burnTotalEl = document.getElementById(`burn-total-${iso}`);
     if (netEl) {
       netEl.textContent = net === null ? '—' : fmtSigned(net);
       netEl.style.color = colorFor(net);
     }
     if (beamEl) {
       beamEl.outerHTML = beamHTML(net, DAY_BEAM_MAX, true, `beam-${iso}`);
+    }
+    if (burnTotalEl) {
+      burnTotalEl.textContent = `${Math.round(burnedTotal(entry)).toLocaleString('es-AR')} kcal`;
     }
   });
 
@@ -409,88 +1082,231 @@ function updateVisuals() {
   }
 }
 
-function onInput(iso, field, value) {
-  weekData[iso] = weekData[iso] || { consumed: '', burned: '' };
-  weekData[iso][field] = value;
-  updateVisuals();
+function changeWeek(delta) {
+  const d = new Date(weekStart);
+  d.setDate(d.getDate() + delta * 7);
+  weekStart = d;
+  renderWeekTab();
+}
+
+function goToday() {
+  weekStart = getMonday(new Date());
+  renderWeekTab();
+}
+
+function addMaintenance(iso) {
+  if (maintenanceValue === '') return;
+  weekData[iso] = weekData[iso] || emptyEntry();
+  weekData[iso].mantenimiento = maintenanceValue;
+  const input = document.querySelector(`input[data-iso="${iso}"][data-field="mantenimiento"]`);
+  if (input) input.value = maintenanceValue;
+  updateWeekVisuals();
   scheduleSave(iso);
 }
 
-function render() {
-  const app = document.getElementById('app');
-  const today = new Date();
-  const days = getWeekDates(weekStart);
+/* ---------- pestaña mes ---------- */
 
-  const dayCards = days.map((d, i) => {
-    const iso = toISO(d);
-    const entry = weekData[iso] || { consumed: '', burned: '' };
+function aggregateTotal(dataMap) {
+  let total = 0;
+  let any = false;
+  Object.values(dataMap).forEach((entry) => {
     const net = netOf(entry);
+    if (net !== null) { total += net; any = true; }
+  });
+  return any ? total : null;
+}
+
+async function renderMonthTab() {
+  const year = monthCursor.getFullYear();
+  const monthIndex = monthCursor.getMonth();
+  const prefix = `${STORAGE_PREFIX}${year}-${pad(monthIndex + 1)}-`;
+  const dataMap = await fetchByPrefix(prefix);
+  renderMonthHTML(year, monthIndex, dataMap);
+}
+
+function renderMonthHTML(year, monthIndex, dataMap) {
+  const today = new Date();
+  const total = aggregateTotal(dataMap);
+  const numDays = daysInMonth(year, monthIndex);
+  const leadingBlanks = mondayIndex(new Date(year, monthIndex, 1).getDay());
+
+  let cells = '';
+  for (let i = 0; i < leadingBlanks; i++) cells += `<div class="cal-cell empty"></div>`;
+  for (let day = 1; day <= numDays; day++) {
+    const d = new Date(year, monthIndex, day);
+    const iso = toISO(d);
+    const entry = dataMap[iso];
+    const net = entry ? netOf(entry) : null;
     const isToday = isSameDay(d, today);
-    return `
-      <div class="daycard${isToday ? ' today' : ''}">
-        <div class="day-top">
-          <div><span class="day-name">${DAY_NAMES[i]}</span><span class="day-date">${d.getDate()} ${MONTH_NAMES[d.getMonth()]}</span></div>
-          <div class="day-net" id="net-${iso}" style="color:${colorFor(net)}">${net === null ? '—' : fmtSigned(net)}</div>
-        </div>
-        ${beamHTML(net, DAY_BEAM_MAX, true, `beam-${iso}`)}
-        <div class="day-inputs">
-          <div class="field">
-            <label>Comidas</label>
-            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.consumed}"
-              oninput="onInput('${iso}','consumed', this.value)">
-          </div>
-          <div class="field">
-            <label>Gastadas</label>
-            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.burned}"
-              oninput="onInput('${iso}','burned', this.value)">
-          </div>
-        </div>
+    cells += `
+      <div class="cal-cell${isToday ? ' today' : ''}">
+        <span>${day}</span>
+        <span class="cal-dot ${dotClassFor(net)}"></span>
       </div>`;
-  }).join('');
+  }
+  const totalCells = leadingBlanks + numDays;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < trailing; i++) cells += `<div class="cal-cell empty"></div>`;
 
-  app.innerHTML = `
-    <p class="eyebrow">Registro diario</p>
-    <h1 class="title">Balance calórico</h1>
-
+  contentEl.innerHTML = `
     <div class="weeknav">
-      <button class="navbtn" onclick="changeWeek(-1)" aria-label="Semana anterior">‹</button>
-      <button class="navbtn today" onclick="goToday()">Hoy</button>
-      <button class="navbtn" onclick="changeWeek(1)" aria-label="Semana siguiente">›</button>
+      <button class="navbtn" data-action="month-prev" aria-label="Mes anterior">‹</button>
+      <button class="navbtn today" data-action="month-today">Hoy</button>
+      <button class="navbtn" data-action="month-next" aria-label="Mes siguiente">›</button>
     </div>
-    <p class="weekrange">${formatRange(weekStart)}</p>
+    <p class="weekrange">${MONTH_FULL[monthIndex]} ${year}</p>
 
     <div class="summary">
-      <p class="summary-label" id="summary-label">—</p>
-      <p class="summary-value" id="summary-value">—</p>
-      ${beamHTML(null, WEEK_BEAM_MAX, false, 'summary-beam')}
+      <p class="summary-label">${total === null ? 'Sin datos este mes' : total < 0 ? 'Déficit del mes' : total > 0 ? 'Superávit del mes' : 'Equilibrio del mes'}</p>
+      <p class="summary-value" style="color:${colorFor(total)}">${total === null ? '—' : fmtSigned(total)}</p>
     </div>
 
-    <div class="daylist">${dayCards}</div>
+    <div class="cal-weekdays">${WEEKDAY_LETTERS.map((l) => `<span>${l}</span>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
 
     <div class="legend">
       <span><span class="dot" style="background:var(--deficit)"></span>Déficit</span>
       <span><span class="dot" style="background:var(--surplus)"></span>Superávit</span>
     </div>
   `;
-
-  updateVisuals();
 }
 
-function changeWeek(delta) {
-  const d = new Date(weekStart);
-  d.setDate(d.getDate() + delta * 7);
-  weekStart = d;
-  loadWeek();
+function changeMonth(delta) {
+  monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + delta, 1);
+  renderMonthTab();
 }
 
-function goToday() {
-  weekStart = getMonday(new Date());
-  loadWeek();
+function goThisMonth() {
+  monthCursor = firstOfMonth(new Date());
+  renderMonthTab();
 }
 
-loadWeek();
+/* ---------- pestaña año ---------- */
+
+async function renderYearTab() {
+  const year = yearCursor;
+  const prefix = `${STORAGE_PREFIX}${year}-`;
+  const dataMap = await fetchByPrefix(prefix);
+  renderYearHTML(year, dataMap);
+}
+
+function renderYearHTML(year, dataMap) {
+  const today = new Date();
+  const total = aggregateTotal(dataMap);
+
+  const monthsHTML = Array.from({ length: 12 }, (_, monthIndex) => {
+    const numDays = daysInMonth(year, monthIndex);
+    const leadingBlanks = mondayIndex(new Date(year, monthIndex, 1).getDay());
+    let cells = '';
+    for (let i = 0; i < leadingBlanks; i++) cells += `<div class="mini-cal-cell"></div>`;
+    for (let day = 1; day <= numDays; day++) {
+      const d = new Date(year, monthIndex, day);
+      const iso = toISO(d);
+      const entry = dataMap[iso];
+      const net = entry ? netOf(entry) : null;
+      const isToday = isSameDay(d, today);
+      cells += `<div class="mini-cal-cell${isToday ? ' today' : ''}"><span class="mini-dot ${dotClassFor(net)}"></span></div>`;
+    }
+    return `
+      <div class="mini-month">
+        <p class="mini-month-title">${MONTH_ABBR[monthIndex]}</p>
+        <div class="mini-cal-grid">${cells}</div>
+      </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="weeknav">
+      <button class="navbtn" data-action="year-prev" aria-label="Año anterior">‹</button>
+      <button class="navbtn today" data-action="year-today">Hoy</button>
+      <button class="navbtn" data-action="year-next" aria-label="Año siguiente">›</button>
+    </div>
+    <p class="weekrange">${year}</p>
+
+    <div class="summary">
+      <p class="summary-label">${total === null ? 'Sin datos este año' : total < 0 ? 'Déficit del año' : total > 0 ? 'Superávit del año' : 'Equilibrio del año'}</p>
+      <p class="summary-value" style="color:${colorFor(total)}">${total === null ? '—' : fmtSigned(total)}</p>
+    </div>
+
+    <div class="year-grid">${monthsHTML}</div>
+
+    <div class="legend">
+      <span><span class="dot" style="background:var(--deficit)"></span>Déficit</span>
+      <span><span class="dot" style="background:var(--surplus)"></span>Superávit</span>
+    </div>
+  `;
+}
+
+function changeYear(delta) {
+  yearCursor += delta;
+  renderYearTab();
+}
+
+function goThisYear() {
+  yearCursor = new Date().getFullYear();
+  renderYearTab();
+}
+
+/* ---------- pestañas y eventos ---------- */
+
+async function renderContent() {
+  contentEl.innerHTML = '<div class="loading">Cargando datos…</div>';
+  if (currentTab === 'inicio') await renderHomeTab();
+  else if (currentTab === 'semana') await renderWeekTab();
+  else if (currentTab === 'mes') await renderMonthTab();
+  else await renderYearTab();
+}
+
+function switchTab(tab) {
+  if (tab === currentTab) return;
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b) => {
+    b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+  });
+  renderContent();
+}
+
+tabbarEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-tab]');
+  if (!btn) return;
+  switchTab(btn.getAttribute('data-tab'));
+});
+
+appEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.getAttribute('data-action');
+  if (action === 'week-prev') changeWeek(-1);
+  else if (action === 'week-next') changeWeek(1);
+  else if (action === 'week-today') goToday();
+  else if (action === 'month-prev') changeMonth(-1);
+  else if (action === 'month-next') changeMonth(1);
+  else if (action === 'month-today') goThisMonth();
+  else if (action === 'year-prev') changeYear(-1);
+  else if (action === 'year-next') changeYear(1);
+  else if (action === 'year-today') goThisYear();
+  else if (action === 'add-maintenance') addMaintenance(btn.getAttribute('data-iso'));
+  else if (action === 'save-weight') saveWeightToday();
+  else if (action === 'save-fat') saveFatToday();
+});
+
+appEl.addEventListener('input', (e) => {
+  const input = e.target.closest('input[data-iso]');
+  if (!input) return;
+  onInput(input.getAttribute('data-iso'), input.getAttribute('data-field'), input.value);
+});
+
+appEl.addEventListener('change', (e) => {
+  if (e.target.id === 'maint-input') saveMaintenance(e.target.value);
+});
+
+async function init() {
+  await loadSettings();
+  renderContent();
+}
+
+init();
 </script>
-<script>
+  <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')

@@ -1,6 +1,6 @@
 const CACHE_NAME = 'balance-cache-v1';
 const urlsToCache = [
-  './balance-calorico.html',
+  './index.html',
   './manifest.json'
 ];
 

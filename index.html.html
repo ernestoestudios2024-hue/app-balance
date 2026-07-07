@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Balance calórico</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14171C">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #14171C;
+  --surface: #1B1F26;
+  --surface-2: #242933;
+  --text: #EDEFF2;
+  --text-muted: #8B93A1;
+  --text-faint: #565D6B;
+  --border: #2C313B;
+  --deficit: #4FD1A5;
+  --deficit-dim: #234A3D;
+  --surplus: #FF6B5F;
+  --surplus-dim: #4A2723;
+  --neutral: #F2C14E;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 4px;
+}
+
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+.weeknav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.navbtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.navbtn:active { transform: scale(0.94); }
+
+.navbtn.today {
+  width: auto;
+  padding: 0 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.weekrange {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+  margin: 14px 0 18px;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 2px;
+}
+
+.summary-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0 0 14px;
+}
+
+.beam {
+  position: relative;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.beam-center {
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--text-faint);
+}
+
+.beam-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 5px;
+}
+
+.beam.small { height: 5px; }
+.beam.small .beam-center { top: -1px; bottom: -1px; }
+
+.daylist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.daycard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  overflow: hidden;
+}
+
+.daycard.today {
+  border-color: var(--neutral);
+}
+
+.day-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.day-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.day-date {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-left: 6px;
+}
+
+.day-net {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.day-inputs {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 10px;
+}
+
+.field label {
+  font-size: 11px;
+  color: var(--text-faint);
+  white-space: nowrap;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 0;
+  -moz-appearance: textfield;
+}
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field input::placeholder { color: var(--text-faint); }
+.field:focus-within { border-color: var(--text-faint); }
+
+.legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.loading {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 13px;
+  padding: 40px 0;
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <p class="eyebrow">Registro diario</p>
+  <h1 class="title">Balance calórico</h1>
+  <div class="loading" id="loading">Cargando datos…</div>
+</div>
+
+<script>
+const STORAGE_PREFIX = 'day:';
+const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MONTH_NAMES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DAY_BEAM_MAX = 800;
+const WEEK_BEAM_MAX = 3500;
+
+let weekStart = getMonday(new Date());
+let weekData = {};
+let saveTimers = {};
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function toISO(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function getWeekDates(monday) {
+  return Array.from({length: 7}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function formatRange(monday) {
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const sameMonth = monday.getMonth() === sunday.getMonth();
+  if (sameMonth) {
+    return `${monday.getDate()} – ${sunday.getDate()} ${MONTH_NAMES[monday.getMonth()]} ${monday.getFullYear()}`;
+  }
+  return `${monday.getDate()} ${MONTH_NAMES[monday.getMonth()]} – ${sunday.getDate()} ${MONTH_NAMES[sunday.getMonth()]} ${sunday.getFullYear()}`;
+}
+
+function num(v) {
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+function hasData(entry) {
+  return entry && (entry.consumed !== '' || entry.burned !== '');
+}
+
+function netOf(entry) {
+  if (!hasData(entry)) return null;
+  return num(entry.consumed) - num(entry.burned);
+}
+
+function fmtSigned(n) {
+  const r = Math.round(n);
+  const sign = r > 0 ? '+' : '';
+  return `${sign}${r.toLocaleString('es-AR')} kcal`;
+}
+
+function colorFor(net) {
+  if (net === null) return 'var(--text-faint)';
+  if (net < 0) return 'var(--deficit)';
+  if (net > 0) return 'var(--surplus)';
+  return 'var(--neutral)';
+}
+
+function beamHTML(net, maxScale, small, id) {
+  const cls = small ? 'beam small' : 'beam';
+  const idAttr = id ? ` id="${id}"` : '';
+  if (net === null || net === 0) {
+    return `<div class="${cls}"${idAttr}><div class="beam-center"></div></div>`;
+  }
+  const pct = Math.min(Math.abs(net) / maxScale, 1) * 50;
+  const color = net < 0 ? 'var(--deficit)' : 'var(--surplus)';
+  const side = net < 0 ? `right: 50%; width: ${pct}%;` : `left: 50%; width: ${pct}%;`;
+  return `<div class="${cls}"${idAttr}><div class="beam-center"></div><div class="beam-fill" style="${side} background:${color};"></div></div>`;
+}
+
+async function loadWeek() {
+  const days = getWeekDates(weekStart);
+  const results = await Promise.all(days.map(async (d) => {
+    const iso = toISO(d);
+    try {
+      const res = await window.storage.get(STORAGE_PREFIX + iso, false);
+      return [iso, res ? JSON.parse(res.value) : { consumed: '', burned: '' }];
+    } catch (e) {
+      return [iso, { consumed: '', burned: '' }];
+    }
+  }));
+  weekData = Object.fromEntries(results);
+  render();
+}
+
+function scheduleSave(iso) {
+  clearTimeout(saveTimers[iso]);
+  saveTimers[iso] = setTimeout(async () => {
+    try {
+      await window.storage.set(STORAGE_PREFIX + iso, JSON.stringify(weekData[iso]), false);
+    } catch (e) {
+      console.error('No se pudo guardar', e);
+    }
+  }, 400);
+}
+
+function updateVisuals() {
+  const days = getWeekDates(weekStart);
+  let total = 0;
+  let anyData = false;
+
+  days.forEach((d) => {
+    const iso = toISO(d);
+    const entry = weekData[iso];
+    const net = netOf(entry);
+    if (net !== null) { total += net; anyData = true; }
+
+    const netEl = document.getElementById(`net-${iso}`);
+    const beamEl = document.getElementById(`beam-${iso}`);
+    if (netEl) {
+      netEl.textContent = net === null ? '—' : fmtSigned(net);
+      netEl.style.color = colorFor(net);
+    }
+    if (beamEl) {
+      beamEl.outerHTML = beamHTML(net, DAY_BEAM_MAX, true, `beam-${iso}`);
+    }
+  });
+
+  const summaryValue = document.getElementById('summary-value');
+  const summaryLabel = document.getElementById('summary-label');
+  const summaryBeam = document.getElementById('summary-beam');
+  const weekNet = anyData ? total : null;
+
+  if (summaryValue) {
+    summaryValue.textContent = weekNet === null ? '—' : fmtSigned(weekNet);
+    summaryValue.style.color = colorFor(weekNet);
+  }
+  if (summaryLabel) {
+    summaryLabel.textContent = weekNet === null ? 'Sin datos esta semana'
+      : weekNet < 0 ? 'Déficit semanal'
+      : weekNet > 0 ? 'Superávit semanal'
+      : 'Equilibrio semanal';
+  }
+  if (summaryBeam) {
+    summaryBeam.outerHTML = beamHTML(weekNet, WEEK_BEAM_MAX, false, 'summary-beam');
+  }
+}
+
+function onInput(iso, field, value) {
+  weekData[iso] = weekData[iso] || { consumed: '', burned: '' };
+  weekData[iso][field] = value;
+  updateVisuals();
+  scheduleSave(iso);
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const today = new Date();
+  const days = getWeekDates(weekStart);
+
+  const dayCards = days.map((d, i) => {
+    const iso = toISO(d);
+    const entry = weekData[iso] || { consumed: '', burned: '' };
+    const net = netOf(entry);
+    const isToday = isSameDay(d, today);
+    return `
+      <div class="daycard${isToday ? ' today' : ''}">
+        <div class="day-top">
+          <div><span class="day-name">${DAY_NAMES[i]}</span><span class="day-date">${d.getDate()} ${MONTH_NAMES[d.getMonth()]}</span></div>
+          <div class="day-net" id="net-${iso}" style="color:${colorFor(net)}">${net === null ? '—' : fmtSigned(net)}</div>
+        </div>
+        ${beamHTML(net, DAY_BEAM_MAX, true, `beam-${iso}`)}
+        <div class="day-inputs">
+          <div class="field">
+            <label>Comidas</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.consumed}"
+              oninput="onInput('${iso}','consumed', this.value)">
+          </div>
+          <div class="field">
+            <label>Gastadas</label>
+            <input type="number" inputmode="numeric" min="0" placeholder="0" value="${entry.burned}"
+              oninput="onInput('${iso}','burned', this.value)">
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <p class="eyebrow">Registro diario</p>
+    <h1 class="title">Balance calórico</h1>
+
+    <div class="weeknav">
+      <button class="navbtn" onclick="changeWeek(-1)" aria-label="Semana anterior">‹</button>
+      <button class="navbtn today" onclick="goToday()">Hoy</button>
+      <button class="navbtn" onclick="changeWeek(1)" aria-label="Semana siguiente">›</button>
+    </div>
+    <p class="weekrange">${formatRange(weekStart)}</p>
+
+    <div class="summary">
+      <p class="summary-label" id="summary-label">—</p>
+      <p class="summary-value" id="summary-value">—</p>
+      ${beamHTML(null, WEEK_BEAM_MAX, false, 'summary-beam')}
+    </div>
+
+    <div class="daylist">${dayCards}</div>
+
+    <div class="legend">
+      <span><span class="dot" style="background:var(--deficit)"></span>Déficit</span>
+      <span><span class="dot" style="background:var(--surplus)"></span>Superávit</span>
+    </div>
+  `;
+
+  updateVisuals();
+}
+
+function changeWeek(delta) {
+  const d = new Date(weekStart);
+  d.setDate(d.getDate() + delta * 7);
+  weekStart = d;
+  loadWeek();
+}
+
+function goToday() {
+  weekStart = getMonday(new Date());
+  loadWeek();
+}
+
+loadWeek();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registrado correctamente.', reg))
+        .catch(err => console.error('Error al registrar el Service Worker.', err));
+    });
+  }
+</script>
+</body>
+</html>

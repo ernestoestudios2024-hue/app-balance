@@ -753,17 +753,16 @@ function lineChartSVG(entries, color, unit) {
 async function fetchByPrefix(prefix) {
   const map = {};
   try {
-    const res = await window.storage.list(prefix, false);
-    const keys = (res && res.keys) || [];
-    await Promise.all(keys.map(async (key) => {
-      try {
-        const r = await window.storage.get(key, false);
-        if (r) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        const val = localStorage.getItem(key);
+        if (val) {
           const iso = key.slice(prefix.length);
-          map[iso] = normalizeEntry(JSON.parse(r.value));
+          map[iso] = normalizeEntry(JSON.parse(val));
         }
-      } catch (e) { /* clave inexistente o corrupta, se ignora */ }
-    }));
+      }
+    }
   } catch (e) { /* sin datos para este prefijo */ }
   return map;
 }
@@ -771,22 +770,21 @@ async function fetchByPrefix(prefix) {
 async function fetchRawSeries(prefix) {
   const map = {};
   try {
-    const res = await window.storage.list(prefix, false);
-    const keys = (res && res.keys) || [];
-    await Promise.all(keys.map(async (key) => {
-      try {
-        const r = await window.storage.get(key, false);
-        if (r) map[key.slice(prefix.length)] = parseFloat(r.value);
-      } catch (e) {}
-    }));
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        const val = localStorage.getItem(key);
+        if (val) map[key.slice(prefix.length)] = parseFloat(val);
+      }
+    }
   } catch (e) {}
   return map;
 }
 
 async function loadSettings() {
   try {
-    const r = await window.storage.get(SETTINGS_MAINT_KEY, false);
-    maintenanceValue = r ? r.value : '';
+    const val = localStorage.getItem(SETTINGS_MAINT_KEY);
+    maintenanceValue = val !== null ? val : '';
   } catch (e) {
     maintenanceValue = '';
   }
@@ -795,15 +793,15 @@ async function loadSettings() {
 async function saveMaintenance(value) {
   maintenanceValue = value;
   try {
-    await window.storage.set(SETTINGS_MAINT_KEY, value, false);
+    localStorage.setItem(SETTINGS_MAINT_KEY, value);
   } catch (e) { console.error('No se pudo guardar el mantenimiento', e); }
 }
 
 function scheduleSave(iso) {
   clearTimeout(saveTimers[iso]);
-  saveTimers[iso] = setTimeout(async () => {
+  saveTimers[iso] = setTimeout(() => {
     try {
-      await window.storage.set(STORAGE_PREFIX + iso, JSON.stringify(weekData[iso]), false);
+      localStorage.setItem(STORAGE_PREFIX + iso, JSON.stringify(weekData[iso]));
     } catch (e) {
       console.error('No se pudo guardar', e);
     }
@@ -918,7 +916,7 @@ async function saveWeightToday() {
   if (!input || input.value === '') return;
   const iso = toISO(new Date());
   try {
-    await window.storage.set(WEIGHT_PREFIX + iso, input.value, false);
+    localStorage.setItem(WEIGHT_PREFIX + iso, input.value);
   } catch (e) { console.error('No se pudo guardar el peso', e); }
   renderHomeTab();
 }
@@ -928,7 +926,7 @@ async function saveFatToday() {
   if (!input || input.value === '') return;
   const iso = toISO(new Date());
   try {
-    await window.storage.set(FAT_PREFIX + iso, input.value, false);
+    localStorage.setItem(FAT_PREFIX + iso, input.value);
   } catch (e) { console.error('No se pudo guardar la grasa corporal', e); }
   renderHomeTab();
 }
@@ -937,15 +935,15 @@ async function saveFatToday() {
 
 async function renderWeekTab() {
   const days = getWeekDates(weekStart);
-  const results = await Promise.all(days.map(async (d) => {
+  const results = days.map((d) => {
     const iso = toISO(d);
     try {
-      const res = await window.storage.get(STORAGE_PREFIX + iso, false);
-      return [iso, normalizeEntry(res ? JSON.parse(res.value) : null)];
+      const res = localStorage.getItem(STORAGE_PREFIX + iso);
+      return [iso, normalizeEntry(res ? JSON.parse(res) : null)];
     } catch (e) {
       return [iso, emptyEntry()];
     }
-  }));
+  });
   weekData = Object.fromEntries(results);
   renderWeekHTML();
 }
